@@ -1,75 +1,63 @@
-Instale os pacotes necessários
+##Instale o VLC:
+- O VLC é um reprodutor de mídia que possui suporte robusto para reprodução de vídeos em tela cheia e em loop. Se você ainda não o tem instalado, abra o terminal e execute:
 
-Primeiro, certifique-se de que os pacotes necessários estão instalados. Você precisará do mpv, um reprodutor de mídia altamente configurável.
-
-sh
-Copiar código
+'''sh
 sudo apt update
-sudo apt install mpv
-Crie o script de reprodução do vídeo
+sudo apt install vlc
+'''
 
-Crie um script que execute o mpv com o vídeo desejado em loop. Supondo que o vídeo está localizado em /home/usuario/videos/video.mp4, o script pode ser algo como:
+##Crie um script para iniciar o VLC: 
+- Crie um script shell que inicia o VLC com o vídeo desejado em tela cheia e em loop. Abra um editor de texto (por exemplo, Mousepad) e crie um arquivo chamado start_video.sh com o seguinte conteúdo:
 
-sh
-Copiar código
-sudo nano /usr/local/bin/play-video.sh
-E adicione o seguinte conteúdo:
-
-sh
-Copiar código
+  '''sh
 #!/bin/bash
-mpv --loop=yes /home/usuario/videos/video.mp4
-Salve e feche o arquivo, depois torne o script executável:
+vlc --fullscreen --loop /caminho/para/seu/video.mp4
+  '''
 
-sh
-Copiar código
-sudo chmod +x /usr/local/bin/play-video.sh
-Crie um serviço systemd
+  - Certifique-se de substituir /caminho/para/seu/video.mp4 pelo caminho real do vídeo que você deseja reproduzir. Salve o arquivo e torne-o executável:
+ 
+  '''sh
+chmod +x /caminho/para/start_video.sh
+  '''
 
-Agora, crie um arquivo de serviço systemd que irá iniciar o script no boot. Crie o arquivo de serviço com:
+## Adicione o script aos aplicativos de inicialização: 
+- Agora você precisa adicionar o script aos aplicativos de inicialização do Xubuntu. Para fazer isso:
 
-sh
-Copiar código
-sudo nano /etc/systemd/system/play-video.service
-Adicione o seguinte conteúdo:
+- Abra as Configurações do sistema e vá para "Sessão e Inicialização" (Session and Startup).
+- Selecione a aba "Aplicativos de Inicialização" (Application Autostart).
+- Clique em "Adicionar" (Add).
+- No campo "Nome" (Name), insira algo como "Iniciar Vídeo".
+- No campo "Descrição" (Description), você pode colocar uma descrição como "Inicia um vídeo em tela cheia e em loop na inicialização".
+- No campo "Comando" (Command), insira o caminho completo para o script que você criou, por exemplo: /caminho/para/start_video.sh.
 
-ini
-Copiar código
-[Unit]
-Description=Play video in loop on startup
-After=network.target
+  ##CONFIGURAR LOGIN SEM SENHA
 
-[Service]
-ExecStart=/usr/local/bin/play-video.sh
-Restart=always
-User=usuario
-Environment=DISPLAY=:0
+  ##Abra o arquivo de configuração do LightDM:
 
-[Install]
-WantedBy=default.target
-Salve e feche o arquivo.
+- O LightDM é o gerenciador de login padrão no Xubuntu. Você precisará editar o arquivo de configuração dele. Abra um terminal e digite:
 
-Habilite e inicie o serviço
+'''sh
+sudo nano /etc/lightdm/lightdm.conf
+''
 
-Habilite o serviço para que ele inicie automaticamente no boot:
+##Adicione as configurações de login automático:
 
-sh
-Copiar código
-sudo systemctl enable play-video.service
-E então, inicie o serviço:
+- No arquivo lightdm.conf, adicione (ou descomente e edite) as seguintes linhas:
 
-sh
-Copiar código
-sudo systemctl start play-video.service
-Reinicie o sistema
+'''sh
+[Seat:*]
+autologin-guest=false
+autologin-user=seu_nome_de_usuario
+autologin-user-timeout=0
+user-session=xubuntu
+'''
 
-Finalmente, reinicie o sistema para testar se o vídeo inicia corretamente em loop:
+## Substitua seu_nome_de_usuario pelo nome de usuário da conta que você deseja que faça login automaticamente.
 
-sh
-Copiar código
-sudo reboot
-Notas adicionais:
-Usuário e caminho do vídeo: Certifique-se de substituir usuario e o caminho do vídeo pelos valores corretos no seu sistema.
-Drivers de vídeo: Verifique se os drivers de vídeo estão corretamente instalados e configurados para garantir uma boa performance na reprodução do vídeo.
-Depuração: Se o vídeo não iniciar corretamente, verifique o status do serviço com sudo systemctl status play-video.service para debugar possíveis problemas.
-Seguindo esses passos, seu sistema Armbian no Orange Pi deverá reproduzir o vídeo desejado em looping toda vez que o sistema for iniciado.
+##Salve e feche o arquivo:
+
+- Para salvar o arquivo no Nano, pressione Ctrl + O e depois Enter.
+- Para sair do Nano, pressione Ctrl + X.
+- Reinicie o computador:
+
+##Após reiniciar, o sistema deve fazer login automaticamente no usuário especificado e iniciar o vídeo conforme configurado anteriormente.
