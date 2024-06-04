@@ -1,63 +1,133 @@
-##Instale o VLC:
-- O VLC é um reprodutor de mídia que possui suporte robusto para reprodução de vídeos em tela cheia e em loop. Se você ainda não o tem instalado, abra o terminal e execute:
+# Configurando um Vídeo Kiosk em Ubuntu Server
 
-'''
-sudo apt update
-sudo apt install vlc
-'''
+Este guia descreve como configurar um Ubuntu Server para iniciar automaticamente e reproduzir um vídeo em loop usando o MPV.
 
-##Crie um script para iniciar o VLC: 
-- Crie um script shell que inicia o VLC com o vídeo desejado em tela cheia e em loop. Abra um editor de texto (por exemplo, Mousepad) e crie um arquivo chamado start_video.sh com o seguinte conteúdo:
+## Passos para Instalar o MPV e o Xorg
 
-  '''
-#!/bin/bash
-vlc --fullscreen --loop /caminho/para/seu/video.mp4
-  '''
+1. **Atualize os pacotes e instale o MPV e o Xorg:**
+    ```bash
+    sudo apt update
+    sudo apt install mpv xorg
+    ```
 
-  - Certifique-se de substituir /caminho/para/seu/video.mp4 pelo caminho real do vídeo que você deseja reproduzir. Salve o arquivo e torne-o executável:
- 
-  '''
-chmod +x /caminho/para/start_video.sh
-  '''
+## Criando um Script de Inicialização para o MPV
 
-## Adicione o script aos aplicativos de inicialização: 
-- Agora você precisa adicionar o script aos aplicativos de inicialização do Xubuntu. Para fazer isso:
+1. **Crie um arquivo de script, por exemplo, `/home/usuario/startup-video.sh` (substitua `usuario` pelo seu nome de usuário):**
+    ```bash
+    sudo nano /home/usuario/startup-video.sh
+    ```
 
-- Abra as Configurações do sistema e vá para "Sessão e Inicialização" (Session and Startup).
-- Selecione a aba "Aplicativos de Inicialização" (Application Autostart).
-- Clique em "Adicionar" (Add).
-- No campo "Nome" (Name), insira algo como "Iniciar Vídeo".
-- No campo "Descrição" (Description), você pode colocar uma descrição como "Inicia um vídeo em tela cheia e em loop na inicialização".
-- No campo "Comando" (Command), insira o caminho completo para o script que você criou, por exemplo: /caminho/para/start_video.sh.
+2. **Adicione o seguinte conteúdo ao script:**
+    ```bash
+    #!/bin/bash
+    xset s off
+    xset -dpms
+    xset s noblank
+    mpv --fs --loop=inf /caminho/para/seu/video.mp4
+    ```
+    Substitua `/caminho/para/seu/video.mp4` pelo caminho do vídeo que você deseja reproduzir.
 
-  ##CONFIGURAR LOGIN SEM SENHA
+3. **Torne o script executável:**
+    ```bash
+    sudo chmod +x /home/usuario/startup-video.sh
+    ```
 
-  ##Abra o arquivo de configuração do LightDM:
+## Configurando o Script para Ser Executado no Boot
 
-- O LightDM é o gerenciador de login padrão no Xubuntu. Você precisará editar o arquivo de configuração dele. Abra um terminal e digite:
+1. **Crie um arquivo de serviço systemd para executar o script na inicialização. Crie um novo arquivo de serviço, por exemplo, `/etc/systemd/system/video-kiosk.service`:**
+    ```bash
+    sudo nano /etc/systemd/system/video-kiosk.service
+    ```
 
-'''
-sudo nano /etc/lightdm/lightdm.conf
-'''
+2. **Adicione o seguinte conteúdo ao arquivo de serviço:**
+    ```ini
+    [Unit]
+    Description=Video Kiosk
+    After=network.target
 
-##Adicione as configurações de login automático:
+    [Service]
+    User=usuario
+    Group=usuario
+    ExecStart=/home/usuario/startup-video.sh
+    Restart=always
+    Environment=DISPLAY=:0
+    Environment=XAUTHORITY=/home/usuario/.Xauthority
 
-- No arquivo lightdm.conf, adicione (ou descomente e edite) as seguintes linhas:
+    [Install]
+    WantedBy=multi-user.target
+    ```
+    Certifique-se de substituir `usuario` pelo seu nome de usuário.
 
-'''
-[Seat:*]
-autologin-guest=false
-autologin-user=seu_nome_de_usuario
-autologin-user-timeout=0
-user-session=xubuntu
-'''
+3. **Habilite e inicie o serviço:**
+    ```bash
+    sudo systemctl enable video-kiosk.service
+    sudo systemctl start video-kiosk.service
+    ```
 
-## Substitua seu_nome_de_usuario pelo nome de usuário da conta que você deseja que faça login automaticamente.
+## Passos Adicionais (se necessário)
 
-##Salve e feche o arquivo:
+### Instalar um Gerenciador de Janelas Leve (opcional)
 
-- Para salvar o arquivo no Nano, pressione Ctrl + O e depois Enter.
-- Para sair do Nano, pressione Ctrl + X.
-- Reinicie o computador:
+1. **Instale o openbox:**
+    ```bash
+    sudo apt install openbox
+    ```
 
-##Após reiniciar, o sistema deve fazer login automaticamente no usuário especificado e iniciar o vídeo conforme configurado anteriormente.
+2. **Atualize o script de inicialização para iniciar o `openbox` antes do MPV:**
+    ```bash
+    sudo nano /home/usuario/startup-video.sh
+    ```
+    Adicione o seguinte conteúdo:
+    ```bash
+    #!/bin/bash
+    xset s off
+    xset -dpms
+    xset s noblank
+    openbox &
+    mpv --fs --loop=inf /caminho/para/seu/video.mp4
+    ```
+
+## Configurando Login Automático
+
+1. **Edite o arquivo de configuração do `getty` para habilitar o login automático:**
+    ```bash
+    sudo nano /etc/systemd/system/getty@tty1.service.d/override.conf
+    ```
+
+    Se o diretório `override.conf` não existir, você pode criá-lo:
+    ```bash
+    sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+    sudo nano /etc/systemd/system/getty@tty1.service.d/override.conf
+    ```
+
+2. **Adicione o seguinte conteúdo ao arquivo `override.conf`:**
+    ```ini
+    [Service]
+    ExecStart=
+    ExecStart=-/sbin/agetty --autologin usuario --noclear %I $TERM
+    ```
+    Substitua `usuario` pelo nome de usuário que você deseja fazer o login automático.
+
+3. **Recarregue o systemd para aplicar as mudanças:**
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl restart getty@tty1.service
+    ```
+
+## Garantindo que o Ambiente Gráfico Inicie Automaticamente
+
+1. **Edite o arquivo `.profile` do usuário:**
+    ```bash
+    nano /home/usuario/.profile
+    ```
+
+2. **Adicione o comando `startx` ao final do arquivo `.profile`:**
+    ```bash
+    if [ -z "$DISPLAY" ] && [ $(tty) = /dev/tty1 ]; then
+        startx
+    fi
+    ```
+
+Com essas configurações, sua máquina Ubuntu Server deve iniciar automaticamente, fazer login no usuário especificado e executar o ambiente gráfico e o MPV para reproduzir o vídeo em loop.
+
+Se precisar de mais alguma coisa ou se encontrar problemas, por favor, me avise!
