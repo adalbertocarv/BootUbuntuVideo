@@ -1,9 +1,17 @@
-#
- __  __ _______ _______ _______ __  __ 
-|  |/  |_     _|       |     __|  |/  |
-|     < _|   |_|   -   |__     |     < 
-|__|\__|_______|_______|_______|__|\__|
-                                       
+                       _  _                       _
+                      (_)(_)                     | |
+      __ _  ___   ___  _  _  ______   __ _  _ __ | |_
+     / _` |/ __| / __|| || ||______| / _` || '__|| __|
+    | (_| |\__ \| (__ | || |        | (_| || |   | |_
+     \__,_||___/ \___||_||_|         \__,_||_|    \__|
+
+
+
+1. **Atualize os pacotes e instale o MPV e o Xorg:**
+    ```bash
+    sudo apt update
+    sudo apt install mpv xorg
+    ```                                     
 # Configurando um Vídeo Kiosk em Ubuntu Server
 
 Este guia descreve como configurar um Ubuntu Server para iniciar automaticamente e reproduzir um vídeo em loop usando o MPV.
