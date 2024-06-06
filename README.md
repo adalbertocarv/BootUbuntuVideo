@@ -1,3 +1,9 @@
+#
+ __  __ _______ _______ _______ __  __ 
+|  |/  |_     _|       |     __|  |/  |
+|     < _|   |_|   -   |__     |     < 
+|__|\__|_______|_______|_______|__|\__|
+                                       
 # Configurando um Vídeo Kiosk em Ubuntu Server
 
 Este guia descreve como configurar um Ubuntu Server para iniciar automaticamente e reproduzir um vídeo em loop usando o MPV.
