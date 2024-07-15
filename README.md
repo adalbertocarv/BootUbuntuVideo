@@ -37,6 +37,7 @@ Este guia descreve como configurar um Ubuntu Server para iniciar automaticamente
     xset s off
     xset -dpms
     xset s noblank
+    sleep 5 # Adicione um atraso para garantir que o ambiente gráfico esteja pronto
     mpv --fs --loop=inf /caminho/para/seu/video.mp4
     ```
     Substitua `/caminho/para/seu/video.mp4` pelo caminho do vídeo que você deseja reproduzir.
