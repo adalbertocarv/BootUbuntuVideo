@@ -78,29 +78,6 @@ Este guia descreve como configurar um Ubuntu Server para iniciar automaticamente
     sudo systemctl start video-kiosk.service
     ```
 
-## Passos Adicionais (se necessário)
-
-### Instalar um Gerenciador de Janelas Leve (opcional)
-
-1. **Instale o openbox:**
-    ```bash
-    sudo apt install openbox
-    ```
-
-2. **Atualize o script de inicialização para iniciar o `openbox` antes do MPV:**
-    ```bash
-    sudo nano /home/usuario/startup-video.sh
-    ```
-    Adicione o seguinte conteúdo:
-    ```bash
-    #!/bin/bash
-    xset s off
-    xset -dpms
-    xset s noblank
-    openbox &
-    mpv --fs --loop=inf /caminho/para/seu/video.mp4
-    ```
-
 ## Configurando Login Automático
 
 1. **Edite o arquivo de configuração do `getty` para habilitar o login automático:**
